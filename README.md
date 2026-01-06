@@ -1,78 +1,146 @@
-This is the Official repository of **Java Spring Boot AI Full Stack Microservices Course: Building Fitness Application**
+Fitness App – Microservices Architecture
+This project is a full-stack fitness tracking and recommendation system built using a microservices architecture. It demonstrates real-world backend patterns including asynchronous communication with Kafka, centralized identity management with Keycloak, polyglot persistence, and Generative AI integration using the Google Gemini API.
 
-# The Ultimate Java and Spring Boot Mastery Roadmap
+The focus of this project is on scalable architecture, secure service interaction, and event-driven design.
 
-Welcome to your one-stop-shop for mastering Java and Spring Boot! This repository offers a comprehensive learning experience with high-quality resources and community support. Dive into over 150+ hours of premium content, with everything you need to excel at Java and Spring Boot development.
+Features
+User Management: Secure registration and profile management using OAuth2.
 
-## 🎓 Learning Roadmap
+Activity Logging: Users can log fitness activities (running, cycling, etc.).
 
-Most of the courses below are available in **Udemy For Business**, so if you have subscription - you can get FREE access.
-Here’s a structured path to enhance your skills with detailed courses available:
+Asynchronous Processing: Activity logs are processed asynchronously via Apache Kafka.
 
-1. **[Spring Boot By Building Complex Projects Step by Step](https://link.embarkx.com/spring-boot) (85+ Hours of Content)**
-2. **[Master Spring Boot Microservices by Building eCommerce Project](https://link.embarkx.com/microservices) (55+ Hours of Content)**
-3. **[Learn Java with 60+ Hours of Content](http://link.embarkx.com/java) (60+ Hours of Content)**
-4. **[Master Spring Security with React JS + OAuth2](https://link.embarkx.com/spring-security) (34+ Hours of Content)**
-5. **[Master IntelliJ IDEA](http://link.embarkx.com/intellij) (3+ Hours of Content)**
+AI Recommendations: The Google Gemini API analyzes fitness data to provide tailored health insights.
 
+Service Discovery: Dynamic service registration using Eureka.
 
-## 🌟 With All Our Courses You Gain Access To
+Centralized Configuration: Global configuration management for all microservices.
 
-- 📝 **Notes:** Detailed and downloadable notes to accompany each lesson.
-- 💻 **Source Code:** Full access to the source code used in the tutorials.
-- 🤔 **Doubt Solving:** Responsive instructor and community support.
-- 🎥 **High-Quality HD Videos:** Easy to understand, high-definition video tutorials.
-- 🔄 **Free Lifetime Updates:** Continuous updates to course content at no extra cost.
+API Gateway: Centralized routing and security enforcement.
 
-## 📚 Why Choose This Mastery Series?
+Architecture Overview
+The system consists of independent services communicating synchronously (REST) and asynchronously (Kafka).
 
-With this series, you're not just learning; you're preparing to dominate the field of Java and Spring Boot development. Our structured learning path ensures that you build your skills progressively, with each course designed to build on the knowledge gained from the previous one.
+Workflow:
 
-### Join Us Now!
+Frontend (React) sends requests to the API Gateway.
 
-Start your journey today to become a master at Java and Spring Boot. Our community and expert instructors are here to support your learning every step of the way. **Enroll and start building your future, today!**
+API Gateway validates authentication tokens via Keycloak and routes requests.
 
+User Service handles user data (stored in PostgreSQL).
 
+Activity Service logs activities (stored in MongoDB) and publishes an event to Kafka.
 
+AI Service consumes the event from Kafka, calls the Google Gemini API for insights, and stores the recommendation in MongoDB.
 
+Tech Stack
+Backend
+Framework: Spring Boot 3.x, Spring Cloud
 
-# Usage Policy for Course Materials
+Language: Java 17
 
-## Instructor Information
+Database: PostgreSQL (User Service), MongoDB (Activity & AI Services)
 
-**Instructor:** Faisal Memon  
-**Company:** [EmbarkX.com](http://www.embarkx.com)
+Message Broker: Apache Kafka
 
-## Policy Overview
+Security: Keycloak (OAuth2 & OpenID Connect)
 
-This document outlines the guidelines and restrictions concerning the use of course materials provided by EmbarkX, including but not limited to PDF presentations, code samples, and video tutorials.
+AI Integration: Google Gemini API
 
-### 1. Personal Use Only
+Frontend
+Library: React
 
-The materials provided in this course are intended for **your personal use only**. They are to be used solely for the purpose of learning and completing this course.
+Build Tool: Vite
 
-### 2. No Unauthorized Sharing or Distribution
+Styling: CSS
 
-You are **not permitted** to share, distribute, or publicly post any course materials on any websites, social media platforms, or other public forums without prior written consent from the instructor.
+Infrastructure
+Service Discovery: Netflix Eureka
 
-### 3. Intellectual Property
+Configuration: Spring Cloud Config Server
 
-All course materials are protected by copyright laws and are the intellectual property of Faisal Memon and EmbarkX. Unauthorized use, reproduction, or distribution of these materials is **strictly prohibited**.
+Gateway: Spring Cloud Gateway
 
-### 4. Reporting Violations
+Containerization: Docker (for Keycloak and Kafka)
 
-If you become aware of any unauthorized sharing or distribution of course materials, please report it immediately to [embarkxofficial@gmail.com](mailto:embarkxofficial@gmail.com).
+Services Description
+Config Server
+Centralized configuration server that manages properties for all microservices, allowing changes without redeployment.
 
-### 5. Legal Action
+Eureka Server
+A service registry that allows microservices to discover each other dynamically.
 
-We reserve the right to take legal action against individuals or entities found to be violating this usage policy.
+API Gateway
+The entry point for all client requests. It handles routing and validates JWT tokens using Keycloak before forwarding requests to internal services.
 
-## Thank You
+User Service
+Manages user accounts and profile data.
 
-Thank you for respecting these guidelines and helping us maintain the integrity of our course materials.
+Tech: Spring Boot, PostgreSQL
 
-## Contact Information
+Activity Service
+Manages fitness activity logs. It acts as a Kafka Producer, sending event data whenever a new activity is logged.
 
-- **Email:** [embarkxofficial@gmail.com](mailto:embarkxofficial@gmail.com)
-- **Website:** [www.embarkx.com](http://www.embarkx.com)
+Tech: Spring Boot, MongoDB, Apache Kafka
 
+AI Recommendation Service
+Acts as a Kafka Consumer. It listens for activity events, processes the data using the Google Gemini API to generate health tips, and stores them for the user.
+
+Tech: Spring Boot, MongoDB, Apache Kafka, Google Gemini API
+
+How to Run Locally
+Prerequisites
+Java 17+
+
+Node.js 18+
+
+Docker Desktop (Required for Kafka & Keycloak)
+
+PostgreSQL
+
+MongoDB
+
+1. Start Infrastructure
+Start Keycloak and Apache Kafka using Docker Compose.
+
+Bash
+
+docker-compose up -d
+2. Start Backend Services
+Run the following services in separate terminal windows in this order:
+
+Bash
+
+# 1. Config Server
+cd configserver
+./mvnw spring-boot:run
+
+# 2. Eureka Server
+cd eurekaserver
+./mvnw spring-boot:run
+
+# 3. User Service
+cd userservice
+./mvnw spring-boot:run
+
+# 4. Activity Service
+cd activityservice
+./mvnw spring-boot:run
+
+# 5. AI Service
+cd aiservice
+./mvnw spring-boot:run
+
+# 6. API Gateway
+cd gateway
+./mvnw spring-boot:run
+3. Start Frontend
+Bash
+
+cd fitness-app-frontend
+npm install
+npm run dev
+The frontend application will be available at http://localhost:5173.
+
+Author
+Harish Kumar
